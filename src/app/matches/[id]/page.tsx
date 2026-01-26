@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { formatDateTime } from '@/lib/date';
+import TopNav from '@/components/TopNav';
+
 import {
   fetchMatchById,
   joinMatch,
@@ -225,80 +228,152 @@ await refreshParticipants(match.id);
     }
   }
 
+  const isFull = !!match && match.slots_taken >= match.slots_total;
+  const cardState = joined ? 'joined' : isFull ? 'full' : 'open';
+
+
+
   return (
-    
-    <div style={{ padding: 20, color: 'white' }}>
-      <Link href="/matches" style={{ color: 'white' }}>
-        ← Back to matches
-      </Link>
-
-      {loading ? (
-        <p style={{ marginTop: 10 }}>Loading…</p>
-      ) : error ? (
-        <p style={{ marginTop: 10, color: 'red' }}>{error}</p>
-      ) : !match ? (
-        <p style={{ marginTop: 10, color: 'red' }}>Match not found</p>
-      ) : (
-        <div style={{ marginTop: 10 }}>
-          <h1 style={{ marginBottom: 8 }}>{match.title}</h1>
-          <div>{match.location ?? 'Unknown location'}</div>
-          <div>{formatDate(match.time_utc)}</div>
-          <div style={{ marginTop: 6 }}>
-            Slots: {match.slots_taken}/{match.slots_total}
-          </div>
-
-          <div style={{ marginTop: 12 }}>
-  <div style={{ opacity: 0.8, marginBottom: 6 }}>
-    Participants ({participants.length}/{match.slots_total})
-  </div>
-
-  {participants.length === 0 ? (
-    <div style={{ opacity: 0.7 }}>No participants yet</div>
-  ) : (
-    <ul style={{ margin: 0, paddingLeft: 18 }}>
-      {participants.map((p) => {
-        const name =
-          p.user_id === currentUserId
-      ? 'You'
-      : p.profiles?.display_name?.trim() || `${p.user_id.slice(0, 8)}…`;
-
-        return (
-          <li key={p.user_id} style={{ marginBottom: 4 }}>
-            {name}
-          </li>
-        );
-      })}
-    </ul>
-  )}
-</div>
-
-
-
-
-          {(() => {
-            const isFull = match.slots_taken >= match.slots_total;
-
-            return (
-              <button
-                onClick={joined ? handleLeave : handleJoin}
-                disabled={joining || (!joined && isFull)}
-                style={{
-                  marginTop: 12,
-                  padding: '8px 14px',
-                  border: '1px solid #444',
-                  borderRadius: 6,
-                  background: joined ? '#2d5a2d' : '#222',
-                  color: 'white',
-                  cursor: 'pointer',
-                }}
-              >
-                {joining ? 'Working…' : joined ? 'Leave' : isFull ? 'Full' : 'Join'}
-              </button>
-            );
-          })()}
-        </div>
-      )}
-    </div>
+    <>
+      <TopNav />
+  
+      <main style={{ maxWidth: 768, margin: '0 auto', padding: 16 }}>
+        <div style={{ padding: 20, color: 'white' }}>
+          <Link href="/matches" style={{ color: 'white' }}>
+            ← Back to matches
+          </Link>
+  
+          {loading ? (
+            <p style={{ marginTop: 10 }}>Loading…</p>
+          ) : error ? (
+            <p style={{ marginTop: 10, color: 'red' }}>{error}</p>
+          ) : !match ? (
+            <p style={{ marginTop: 10, color: 'red' }}>Match not found</p>
+          ) : (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 14,
+                border: '1px solid #2a2a2a',
+                borderLeft: `4px solid ${
+                  cardState === 'full'
+                    ? '#6b2a2a'
+                    : cardState === 'joined'
+                    ? '#2d5a2d'
+                    : '#2a2a2a'
+                }`,
+                background: '#151515',
+                borderRadius: 10,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 12,
+              }}
+            >
+              {/* LEFT */}
+              <div style={{ minWidth: 0 }}>
+                <h1 style={{ marginBottom: 6, fontSize: 18 }}>{match.title}</h1>
+          
+                <div style={{ opacity: 0.85 }}>
+                {match.location ?? 'Unknown location'} — {formatDateTime(match.time_utc)}
+                </div>
+          
+                <div style={{ marginTop: 6, opacity: 0.9 }}>
+                  Slots: {match.slots_taken}/{match.slots_total}
+                </div>
+          
+                {/* participants block — оставляешь как есть */}
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ opacity: 0.8, marginBottom: 6 }}>
+                    Participants ({participants.length}/{match.slots_total})
+                  </div>
+          
+                  {participants.length === 0 ? (
+                    <div style={{ opacity: 0.7 }}>No participants yet</div>
+                  ) : (
+                    <ul style={{ margin: 0, paddingLeft: 18 }}>
+                      {participants.map((p) => {
+                        const name =
+                          p.user_id === currentUserId
+                            ? 'You'
+                            : p.profiles?.display_name?.trim() ||
+                              `${p.user_id.slice(0, 8)}…`;
+          
+                        return (
+                          <li key={p.user_id} style={{ marginBottom: 4 }}>
+                            {name}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </div>
+          
+              {/* RIGHT */}
+              <div style={{ flexShrink: 0 }}>
+                {cardState === 'full' ? (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 10,
+                      border: '1px solid #6b2a2a',
+                      background: '#3a1f1f',
+                      color: 'white',
+                      fontWeight: 600,
+                      minWidth: 92,
+                      textAlign: 'center',
+                      opacity: 0.9,
+                      userSelect: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Full
+                  </div>
+                ) : joined ? (
+                  <button
+                    onClick={handleLeave}
+                    disabled={joining}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 10,
+                      border: '1px solid #6b2a2a',
+                      background: '#3a1f1f',
+                      color: 'white',
+                      cursor: joining ? 'not-allowed' : 'pointer',
+                      minWidth: 92,
+                      fontWeight: 600,
+                      opacity: joining ? 0.85 : 1,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {joining ? 'Working…' : 'Leave'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleJoin}
+                    disabled={joining}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 10,
+                      border: '1px solid #444',
+                      background: '#222',
+                      color: 'white',
+                      cursor: joining ? 'not-allowed' : 'pointer',
+                      minWidth: 92,
+                      fontWeight: 600,
+                      opacity: joining ? 0.85 : 1,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {joining ? 'Working…' : 'Join'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+               </div>
+      </main>
+    </>
   );
 }
-

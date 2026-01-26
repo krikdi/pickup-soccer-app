@@ -10,14 +10,11 @@ export async function fetchMatches(): Promise<{
   data: Match[] | null;
   error: any;
 }> {
-  console.log("FETCH_MATCHES_CALLED ✅");
 
   const { data, error } = await supabase
     .from("matches")
     .select("*")
     .order("time_utc", { ascending: true });
-
-  console.log("FETCH_MATCHES_RAW ✅", { data, error });
 
   if (error) {
     console.error("Supabase error in fetchMatches:", error);
