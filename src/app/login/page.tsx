@@ -16,6 +16,7 @@ export default function LoginPage() {
       typeof window !== 'undefined'
         ? `${window.location.origin}/auth/callback`
         : undefined;
+        options: { emailRedirectTo }
 
     const { error } = await supabase.auth.signInWithOtp({
       email,

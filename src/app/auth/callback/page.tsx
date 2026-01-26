@@ -8,7 +8,7 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForSession(maxTries = 10, delayMs = 150) {
+async function waitForSession(maxTries = 12, delayMs = 200) {
   for (let i = 0; i < maxTries; i++) {
     const { data } = await supabase.auth.getSession();
     if (data.session) return true;
@@ -21,41 +21,40 @@ export default function AuthCallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let cancelled = false;
+
     async function run() {
       const url = new URL(window.location.href);
       const token_hash = url.searchParams.get('token_hash');
-      const type = url.searchParams.get('type') as any; // 'magiclink' | 'recovery' | etc
+      const type = url.searchParams.get('type') as any;
 
-      // 1) email OTP приходит как query: ?token_hash=...&type=magiclink
+      // 1) OTP via query
       if (token_hash && type) {
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash,
-          type,
-        });
+        const { error } = await supabase.auth.verifyOtp({ token_hash, type });
 
         if (error) {
           console.error('verifyOtp error:', error);
-          router.replace(`/login?error=${encodeURIComponent(error.message)}`);
+          if (!cancelled) router.replace(`/login?error=${encodeURIComponent(error.message)}`);
           return;
         }
+      }
 
-        // avoid race condition: wait until session is persisted
-        await waitForSession();
+      // 2) In both cases (query OTP or hash tokens), wait for session to persist
+      const ok = await waitForSession();
 
-        router.replace('/matches');
-        router.refresh();
+      if (!ok) {
+        if (!cancelled) router.replace('/login?error=No%20session%20after%20callback');
         return;
       }
 
-      // 2) иногда Supabase возвращает сессию в hash (#access_token=...)
-      // подождём, пока Supabase подхватит сессию, и только потом редирект
-      await waitForSession();
-
-      router.replace('/matches');
-      router.refresh();
+      if (!cancelled) router.replace('/matches');
     }
 
     run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   return <div style={{ padding: 20, color: 'white' }}>Signing you in…</div>;
