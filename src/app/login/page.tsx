@@ -12,10 +12,15 @@ export default function LoginPage() {
     setLoading(true);
     setMsg(null);
 
+    const emailRedirectTo =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/auth/callback`
+        : undefined;
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: 'http://localhost:3000/auth/callback',
+        emailRedirectTo,
       },
     });
 
