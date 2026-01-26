@@ -1,98 +1,141 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createMatch } from '../../../lib/supabaseClient';
+import TopNav from '@/components/TopNav';
+import { createMatch, supabase } from '@/lib/supabaseClient';
+
+
 
 export default function NewMatchPage() {
+  const router = useRouter();
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) router.replace('/login');
+    });
+  }, [router]);
+  
+
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
-  const [timeUtc, setTimeUtc] = useState('');
-  const [slotsTotal, setSlotsTotal] = useState(20);
-  const [message, setMessage] = useState<string | null>(null);
+  const [timeLocal, setTimeLocal] = useState(''); // datetime-local
+  const [slotsTotal, setSlotsTotal] = useState<number>(20);
+  
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setMessage(null);
+    setError(null);
+  
+    if (!timeLocal) {
+      setError('Pick date/time');
+      return;
+    }
+    const { data: auth } = await supabase.auth.getUser();
+if (!auth.user) {
+  setError('You must be logged in to create a match.');
+  router.replace('/login');
+  return;
+}
 
+  
+    setSaving(true);
     try {
-      const { data, error } = await createMatch({
-        title,
-        location,
-        time_utc: timeUtc,
+      const utcIso = new Date(timeLocal).toISOString();
+  
+      const { error } = await createMatch({
+        title: title.trim(),
+        location: location.trim(),
+        time_utc: utcIso,
         slots_total: slotsTotal,
       });
-
-      if (error) {
-        setMessage('❌ Ошибка: ' + error.message);
-      } else {
-        setMessage('✅ Матч успешно создан!');
-        // очищаем форму
-        setTitle('');
-        setLocation('');
-        setTimeUtc('');
-        setSlotsTotal(20);
-      }
+  
+      if (error) throw error;
+  
+      router.push('/matches');
+      router.refresh();
     } catch (err: any) {
-      setMessage('❌ Неизвестная ошибка: ' + err.message);
+      setError(err?.message ?? 'Failed to create match');
+    } finally {
+      setSaving(false);
     }
   }
 
+  const inputStyle: React.CSSProperties = {
+    padding: '10px 12px',
+    borderRadius: 10,
+    border: '1px solid #2a2a2a',
+    background: '#151515',
+    color: 'white',
+    outline: 'none',
+  };
+  
+  const buttonStyle: React.CSSProperties = {
+    padding: '10px 14px',
+    borderRadius: 10,
+    border: '1px solid #444',
+    background: '#222',
+    color: 'white',
+    cursor: saving ? 'not-allowed' : 'pointer',
+    fontWeight: 600,
+    opacity: saving ? 0.85 : 1,
+  };
+    
+
   return (
-    <div style={{ padding: 20, color: 'white' }}>
-      <h1>Create new match</h1>
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 400 }}>
-        <label>
-          Title:
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            style={{ width: '100%' }}
-            required
-          />
-        </label>
-
-        <label>
-          Location:
-          <input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            style={{ width: '100%' }}
-            required
-          />
-        </label>
-
-        <label>
-          Time (UTC, YYYY-MM-DD HH:mm):
-          <input
-            value={timeUtc}
-            onChange={(e) => setTimeUtc(e.target.value)}
-            style={{ width: '100%' }}
-            required
-          />
-        </label>
-
-        <label>
-          Slots total:
-          <input
-            type="number"
-            value={slotsTotal}
-            onChange={(e) => setSlotsTotal(Number(e.target.value))}
-            style={{ width: '100%' }}
-            min={1}
-            required
-          />
-        </label>
-
-        <button type="submit">Create match</button>
-      </form>
-
-      {message && (
-        <p style={{ marginTop: 20 }}>
-          {message}
-        </p>
-      )}
-    </div>
+    <>
+      <TopNav />
+  
+      <main style={{ maxWidth: 768, margin: '0 auto', padding: 16 }}>
+        <div style={{ padding: 20, color: 'white' }}>
+          <h1 style={{ marginBottom: 12 }}>Create match</h1>
+  
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ opacity: 0.85 }}>Title</span>
+              <input value={title} onChange={(e) => setTitle(e.target.value)} required style={inputStyle} />
+            </label>
+  
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ opacity: 0.85 }}>Location</span>
+              <input value={location} onChange={(e) => setLocation(e.target.value)} required style={inputStyle} />
+            </label>
+  
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ opacity: 0.85 }}>Time (local)</span>
+              <input
+                type="datetime-local"
+                value={timeLocal}
+                onChange={(e) => setTimeLocal(e.target.value)}
+                required
+                style={inputStyle}
+              />
+              <span style={{ fontSize: 12, opacity: 0.7 }}>We’ll save it as UTC.</span>
+            </label>
+  
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ opacity: 0.85 }}>Slots total</span>
+              <input
+                type="number"
+                min={2}
+                max={50}
+                value={slotsTotal}
+                onChange={(e) => setSlotsTotal(Number(e.target.value))}
+                required
+                style={inputStyle}
+              />
+            </label>
+  
+            {error && <div style={{ color: 'red', marginTop: 6 }}>{error}</div>}
+  
+            <button type="submit" disabled={saving} style={buttonStyle}>
+              {saving ? 'Creating…' : 'Create match'}
+            </button>
+          </form>
+        </div>
+      </main>
+    </>
   );
 }

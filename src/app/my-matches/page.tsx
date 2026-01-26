@@ -100,7 +100,8 @@ export default function MyMatchesPage() {
                 {/* LEFT */}
                 <div style={{ minWidth: 0 }}>
                   <Link
-                    href={`/matches/${match.id}`}
+                  href={`/matches/${match.id}?from=/my-matches`}
+
                     style={{ color: 'white', textDecoration: 'none', display: 'inline-block' }}
                   >
                     <div style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.2 }}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatDateTime } from '@/lib/date';
 import TopNav from '@/components/TopNav';
@@ -37,6 +37,8 @@ export default function MatchPage() {
   }
 
   const params = useParams<{ id?: string | string[] }>();
+  const searchParams = useSearchParams();
+const backHref = searchParams.get('from') || '/matches';
   const rawId = params?.id;
   const matchId = Array.isArray(rawId) ? rawId[0] : rawId;
   
@@ -239,9 +241,10 @@ await refreshParticipants(match.id);
   
       <main style={{ maxWidth: 768, margin: '0 auto', padding: 16 }}>
         <div style={{ padding: 20, color: 'white' }}>
-          <Link href="/matches" style={{ color: 'white' }}>
-            ← Back to matches
-          </Link>
+        <Link href={backHref} style={{ color: 'white' }}>
+  ← Back
+</Link>
+
   
           {loading ? (
             <p style={{ marginTop: 10 }}>Loading…</p>

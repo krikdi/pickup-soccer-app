@@ -172,10 +172,10 @@ setUser(authData.user);
 >
   {/* LEFT: text */}
   <div style={{ minWidth: 0 }}>
-    <Link
-      href={`/matches/${match.id}`}
-      style={{ color: 'white', textDecoration: 'none', display: 'inline-block' }}
-    >
+  <Link
+  href={`/matches/${match.id}?from=/matches`}
+  style={{ color: 'white', textDecoration: 'none', display: 'inline-block' }}
+>
       <div style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.2 }}>
         {match.title}
       </div>
