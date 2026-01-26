@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams} from 'next/navigation';
+import { Suspense } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -26,11 +27,20 @@ function NavLink({
     </Link>
   );
 }
-
+function FromReader({ onFrom }: { onFrom: (value: string | null) => void }) {
+    const searchParams = useSearchParams();
+    const from = searchParams.get('from');
+  
+    useEffect(() => {
+      onFrom(from);
+    }, [from, onFrom]);
+  
+    return null;
+  }
+  
 export default function TopNav() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-const from = searchParams.get('from'); // ожидаем "/my-matches"
+  const [from, setFrom] = useState<string | null>(null);
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -68,6 +78,10 @@ const from = searchParams.get('from'); // ожидаем "/my-matches"
 
   return (
     <header className="w-full border-b border-gray-200 bg-white">
+        <Suspense fallback={null}>
+  <FromReader onFrom={setFrom} />
+</Suspense>
+
       <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
         
         {/* LEFT */}
