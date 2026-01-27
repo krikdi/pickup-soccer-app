@@ -49,12 +49,24 @@ export default function TopNav() {
   const [hasSession, setHasSession] = useState(false);
 
   const isActive = (href: string) => {
+    // если мы на странице матча (/matches/[id]) и пришли из my-matches
     if (pathname?.startsWith('/matches/') && from === '/my-matches') {
       return href === '/my-matches';
     }
-    if (href === '/matches') return pathname === '/matches' || pathname?.startsWith('/matches/');
+  
+    // строго: /matches активен только на /matches и /matches/[id]
+    if (href === '/matches') {
+      return pathname === '/matches' || (pathname?.startsWith('/matches/') && !pathname?.startsWith('/matches/new'));
+    }
+  
+    // строго: create активен только на /matches/new
+    if (href === '/matches/new') {
+      return pathname === '/matches/new';
+    }
+  
     return pathname === href;
   };
+  
 
   // ✅ session-first approach + live updates
   useEffect(() => {
@@ -134,7 +146,8 @@ export default function TopNav() {
             </>
           ) : (
             <button
-              onClick={() => router.push('/login')}
+            onClick={() => router.replace('/login')}
+
               className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-200"
             >
               Login

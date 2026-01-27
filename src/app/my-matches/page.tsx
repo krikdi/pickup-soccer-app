@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase, fetchMyMatches } from '../../lib/supabaseClient';
 import { formatDateTime } from '@/lib/date';
+import { useRouter } from 'next/navigation';
 import TopNav from '@/components/TopNav';
 
 
@@ -21,34 +22,46 @@ export default function MyMatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
 
   useEffect(() => {
+    let mounted = true;
+  
     async function load() {
       setLoading(true);
       setError(null);
-
-      const { data: authData } = await supabase.auth.getUser();
-      const user = authData.user;
-
+  
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user ?? null;
+  
       if (!user) {
-        window.location.href = '/login';
+        if (mounted) setLoading(false);
+        router.replace('/login');
         return;
       }
-
+  
       const { data, error } = await fetchMyMatches(user.id);
-
+  
+      if (!mounted) return;
+  
       if (error) {
         setError(error.message ?? 'Failed to load my matches');
         setMatches([]);
       } else {
         setMatches((data ?? []) as Match[]);
       }
-
+  
       setLoading(false);
     }
-
+  
     load();
-  }, []);
+  
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
+  
 
   if (loading) return <div style={{ padding: 20, color: 'white' }}>Loading…</div>;
 
