@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -109,27 +109,35 @@ export default function TopNav() {
           <NavLink href="/my-matches" label="My Matches" active={isActive('/my-matches')} />
         </nav>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-3 flex-wrap justify-end">
-          {email && (
-            <div className="px-3 py-2 rounded-md bg-gray-100 text-gray-800 text-sm whitespace-nowrap">
-              {email}
-            </div>
-          )}
+                {/* RIGHT */}
+                <div className="flex items-center gap-3 flex-wrap justify-end">
+          {hasSession ? (
+            <>
+              {email && (
+                <div className="px-3 py-2 rounded-md bg-gray-100 text-gray-800 text-sm whitespace-nowrap">
+                  {email}
+                </div>
+              )}
 
-          {/* ✅ Logout only when session exists */}
-          {hasSession && (
+              <button
+                onClick={onLogout}
+                disabled={isLoggingOut}
+                className={[
+                  'px-3 py-2 rounded-md text-sm font-medium',
+                  isLoggingOut
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+                ].join(' ')}
+              >
+                {isLoggingOut ? 'Logging out…' : 'Logout'}
+              </button>
+            </>
+          ) : (
             <button
-              onClick={onLogout}
-              disabled={isLoggingOut}
-              className={[
-                'px-3 py-2 rounded-md text-sm font-medium',
-                isLoggingOut
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-              ].join(' ')}
+              onClick={() => router.push('/login')}
+              className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-200"
             >
-              {isLoggingOut ? 'Logging out…' : 'Logout'}
+              Login
             </button>
           )}
         </div>
