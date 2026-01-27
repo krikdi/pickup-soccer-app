@@ -106,6 +106,14 @@ export default function TopNav() {
       router.refresh();
     }
   }
+  const goProtected = (href: string) => {
+    if (!hasSession) {
+      router.push('/login');
+      return;
+    }
+    router.push(href);
+  };
+
 
   return (
     <header className="w-full border-b border-gray-200 bg-white">
@@ -116,10 +124,35 @@ export default function TopNav() {
       <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
         {/* LEFT */}
         <nav className="flex items-center gap-2">
-          <NavLink href="/matches/new" label="Create" active={isActive('/matches/new')} />
-          <NavLink href="/matches" label="Matches" active={isActive('/matches')} />
-          <NavLink href="/my-matches" label="My Matches" active={isActive('/my-matches')} />
-        </nav>
+  {/* Create (protected) */}
+  {hasSession ? (
+    <NavLink href="/matches/new" label="Create" active={isActive('/matches/new')} />
+  ) : (
+    <button
+      onClick={() => goProtected('/matches/new')}
+      className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-200"
+    >
+      Create
+    </button>
+  )}
+
+  {/* Matches (public) */}
+  <NavLink href="/matches" label="Matches" active={isActive('/matches')} />
+
+  {/* My Matches (protected) */}
+  {hasSession ? (
+    <NavLink href="/my-matches" label="My Matches" active={isActive('/my-matches')} />
+  ) : (
+    <button
+      onClick={() => goProtected('/my-matches')}
+      className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-200"
+    >
+      My Matches
+    </button>
+  )}
+</nav>
+
+
 
                 {/* RIGHT */}
                 <div className="flex items-center gap-3 flex-wrap justify-end">
