@@ -35,6 +35,7 @@ export const viewport: Viewport = {
   themeColor: "#ff6a00", // твой оранжевый (можешь оставить #ff5a1f если он основной)
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
