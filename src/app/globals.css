@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
+/* ✅ Force dark by default (fixes iOS light mode / IG webview) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +14,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* (Optional) If you ever want to support light later, flip this logic
+   or introduce a theme toggle. For now we keep it always dark. */
 
+html,
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+body {
   font-family: Arial, Helvetica, sans-serif;
 }
