@@ -121,9 +121,11 @@ export default function TopNav() {
         <FromReader onFrom={setFrom} />
       </Suspense>
 
-      <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
+      <div className="mx-auto max-w-3xl px-4 py-3 flex flex-wrap items-center gap-2">
+
         {/* LEFT */}
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-2 flex-wrap">
+
   {/* Create (protected) */}
   {hasSession ? (
     <NavLink href="/matches/new" label="Create" active={isActive('/matches/new')} />
@@ -155,13 +157,15 @@ export default function TopNav() {
 
 
                 {/* RIGHT */}
-                <div className="flex items-center gap-3 flex-wrap justify-end">
+                <div className="ml-auto flex items-center gap-2 flex-wrap min-w-0">
+
           {hasSession ? (
             <>
               {email && (
-                <div className="px-3 py-2 rounded-md bg-gray-100 text-gray-800 text-sm whitespace-nowrap">
-                  {email}
-                </div>
+                <div className="px-3 py-2 rounded-md bg-gray-100 text-gray-800 text-sm max-w-[140px] truncate">
+                {email}
+              </div>              
+              
               )}
 
               <button

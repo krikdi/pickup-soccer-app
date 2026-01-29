@@ -61,12 +61,16 @@ export default function NewMatchPage() {
     setSaving(true);
     try {
       const utcIso = new Date(timeLocal).toISOString();
+      const safeSlots = Number(slotsTotal) || 20;
+
 
       const { error } = await createMatch({
         title: title.trim(),
         location: location.trim(),
         time_utc: utcIso,
-        slots_total: slotsTotal,
+        slots_total: safeSlots,
+
+        
       });
 
       if (error) throw error;
@@ -137,17 +141,24 @@ export default function NewMatchPage() {
             </label>
 
             <label style={{ display: 'grid', gap: 6 }}>
-              <span style={{ opacity: 0.85 }}>Slots total</span>
-              <input
-                type="number"
-                min={2}
-                max={50}
-                value={slotsTotal}
-                onChange={(e) => setSlotsTotal(Number(e.target.value))}
-                required
-                style={inputStyle}
-              />
-            </label>
+  <span style={{ opacity: 0.85 }}>Slots total</span>
+
+  <select
+    value={slotsTotal}
+    onChange={(e) => setSlotsTotal(Number(e.target.value))}
+    required
+    style={inputStyle}
+  >
+    {Array.from({ length: 39 }, (_, i) => i + 2).map((n) => (
+      <option key={n} value={n}>
+        {n}
+      </option>
+    ))}
+  </select>
+
+  <span style={{ fontSize: 12, opacity: 0.7 }}>Choose 10–40 players.</span>
+</label>
+
 
             {error && <div style={{ color: 'red', marginTop: 6 }}>{error}</div>}
 
