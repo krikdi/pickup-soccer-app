@@ -156,7 +156,7 @@ export default function NewMatchPage() {
     ))}
   </select>
 
-  <span style={{ fontSize: 12, opacity: 0.7 }}>Choose 10–40 players.</span>
+  <span style={{ fontSize: 12, opacity: 0.7 }}>Choose 2–40 players.</span>
 </label>
 
 

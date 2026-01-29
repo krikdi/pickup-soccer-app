@@ -157,40 +157,39 @@ export default function TopNav() {
 
 
                 {/* RIGHT */}
-                <div className="ml-auto flex items-center gap-2 flex-wrap min-w-0">
-
-          {hasSession ? (
-            <>
-              {email && (
-                <div className="px-3 py-2 rounded-md bg-gray-100 text-gray-800 text-sm max-w-[140px] truncate">
-                {email}
-              </div>              
-              
-              )}
-
-              <button
-                onClick={onLogout}
-                disabled={isLoggingOut}
-                className={[
-                  'px-3 py-2 rounded-md text-sm font-medium',
-                  isLoggingOut
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-                ].join(' ')}
-              >
-                {isLoggingOut ? 'Logging out…' : 'Logout'}
-              </button>
-            </>
-          ) : (
-            <button
-            onClick={() => router.replace('/login')}
-
-              className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-200"
-            >
-              Login
-            </button>
-          )}
+                <div className="flex items-center gap-2 justify-end min-w-0">
+  {hasSession ? (
+    <>
+      {/* Email – только на md+ */}
+      {email && (
+        <div className="hidden md:block px-3 py-2 rounded-md bg-gray-100 text-gray-800 text-sm truncate max-w-[200px]">
+          {email}
         </div>
+      )}
+
+      <button
+        onClick={onLogout}
+        disabled={isLoggingOut}
+        className={[
+          'px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap',
+          isLoggingOut
+            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+        ].join(' ')}
+      >
+        {isLoggingOut ? '...' : 'Logout'}
+      </button>
+    </>
+  ) : (
+    <button
+      onClick={() => router.replace('/login')}
+      className="px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-200"
+    >
+      Login
+    </button>
+  )}
+</div>
+
       </div>
     </header>
   );
